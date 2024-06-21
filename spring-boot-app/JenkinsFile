@@ -5,24 +5,30 @@ pipeline {
       args '--user root -v /var/run/docker.sock:/var/run/docker.sock' // mount Docker socket to access the host's Docker daemon
     }
   }
+  environment {
+    SONAR_URL = "http://13.201.58.182:9000/"
+    GITHUB_CREDENTIALS = credentials('git-hub-access') // GitHub credentials ID
+    DOCKER_IMAGE = "akshaynagtilak123/ultimate-cicd:${BUILD_NUMBER}"
+    REGISTRY_CREDENTIALS = credentials('docker-cred')
+    TARGET_REPO = 'https://github.com/aks9890/manifest_file.git'
+    DEPLOYMENT_FILE_PATH = 'Kubernetes/Deployment.yaml' // Adjust this path
+  }
   stages {
     stage('Checkout') {
       steps {
         sh 'echo passed'
-        //git branch: 'master', url: 'https://github.com/aks9890/spring-boot.git'
+        // Uncomment the following line if you need to check out the source code
+        // git branch: 'master', url: 'https://github.com/aks9890/spring-boot.git'
       }
     }
     stage('Build and Test') {
       steps {
         sh 'ls -ltr'
-        // build the project and create a JAR file
+        // Build the project and create a JAR file
         sh 'cd spring-boot-app && mvn clean package'
       }
     }
     stage('Static Code Analysis') {
-      environment {
-        SONAR_URL = "http://13.201.58.182:9000/"
-      }
       steps {
         withCredentials([string(credentialsId: 'sonarqube', variable: 'SONAR_AUTH_TOKEN')]) {
           sh 'cd spring-boot-app && mvn sonar:sonar -Dsonar.login=$SONAR_AUTH_TOKEN -Dsonar.host.url=${SONAR_URL}'
@@ -30,43 +36,32 @@ pipeline {
       }
     }
     stage('Build and Push Docker Image') {
-      environment {
-        DOCKER_IMAGE = "akshaynagtilak123/ultimate-cicd:${BUILD_NUMBER}"
-        // DOCKERFILE_LOCATION = "spring-boot-app/Dockerfile"
-        REGISTRY_CREDENTIALS = credentials('docker-cred')
-      }
       steps {
         script {
-            sh 'cd spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
-            def dockerImage = docker.image("${DOCKER_IMAGE}")
-            docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
-                dockerImage.push()
-            }
+          sh 'cd spring-boot-app && docker build -t ${DOCKER_IMAGE} .'
+          def dockerImage = docker.image("${DOCKER_IMAGE}")
+          docker.withRegistry('https://index.docker.io/v1/', "docker-cred") {
+            dockerImage.push()
+          }
         }
       }
     }
     stage('Checkout Target Repository') {
-      environment {
-            GITHUB_CREDENTIALS = credentials('git-hub-access') // GitHub credentials ID
-            TARGET_REPO = 'https://github.com/aks9890/manifest_file.git'
-          }
-            steps {
-                dir('manifest_file') {
-                    git branch: 'main', url: "${env.TARGET_REPO}", credentialsId: "${env.GITHUB_CREDENTIALS}"
-                }
-            }
+      steps {
+        dir('manifest_file') {
+          git branch: 'main', url: "${env.TARGET_REPO}", credentialsId: "${env.GITHUB_CREDENTIALS}"
         }
-        stage('Update Deployment File') {
-            environment {
-            DEPLOYMENT_FILE_PATH = 'Kubernetes/Deployment.yaml' // Adjust this path
-            GITHUB_CREDENTIALS = credentials('git-hub-access') // GitHub credentials ID
-          }
-            steps {
-                dir('manifest_file') {
-                    sh "sed -i 's|replaceImageTag|${BUILD_NUMBER}|g' ${DEPLOYMENT_FILE_PATH}"
-                    sh "git add ${DEPLOYMENT_FILE_PATH}"
-                    sh 'git commit -m "Update deployment image to version ${BUILD_NUMBER}"'
-                    sh "git push https://${GITHUB_CREDENTIALS_USR}:${GITHUB_CREDENTIALS_PSW}@github.com/aks9890/manifest_file.git"
-                }
-            }
+      }
+    }
+    stage('Update Deployment File') {
+      steps {
+        dir('manifest_file') {
+          sh "sed -i 's|replaceImageTag|${BUILD_NUMBER}|g' ${DEPLOYMENT_FILE_PATH}"
+          sh "git add ${DEPLOYMENT_FILE_PATH}"
+          sh 'git commit -m "Update deployment image to version ${BUILD_NUMBER}"'
+          sh "git push https://${GITHUB_CREDENTIALS_USR}:${GITHUB_CREDENTIALS_PSW}@github.com/aks9890/manifest_file.git"
         }
+      }
+    }
+  }
+}
