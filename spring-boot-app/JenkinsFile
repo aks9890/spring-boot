@@ -59,7 +59,6 @@ pipeline {
         stage('Update Deployment File') {
             environment {
             DEPLOYMENT_FILE_PATH = 'Kubernetes/Deployment.yaml' // Adjust this path
-            TARGET_REPO = 'https://github.com/aks9890/manifest_file.git'
             GITHUB_CREDENTIALS = credentials('git-hub-access') // GitHub credentials ID
           }
             steps {
