@@ -7,7 +7,7 @@ pipeline {
   }
   environment {
     SONAR_URL = "http://13.201.58.182:9000/"
-    GITHUB_CREDENTIALS = credentials('git-hub-access') // GitHub credentials ID
+    GITHUB_CREDENTIALS = credentials('git-hub-token') // GitHub credentials ID
     DOCKER_IMAGE = "akshaynagtilak123/ultimate-cicd:${BUILD_NUMBER}"
     REGISTRY_CREDENTIALS = credentials('docker-cred')
     TARGET_REPO = 'https://github.com/aks9890/manifest_file.git'
@@ -55,7 +55,7 @@ pipeline {
     }
     stage('Update Deployment File') {
       steps {
-        withCredentials([string(credentialsId: 'git-hub-access', variable: 'GITHUB_TOKEN')]) {
+        withCredentials([string(credentialsId: 'git-hub-token', variable: 'GITHUB_TOKEN')]) {
         dir('manifest_file') {
           sh "git config user.email 'akshaynagtilak123@gmail.com'"
           sh "git config user.name 'aks9890'"
