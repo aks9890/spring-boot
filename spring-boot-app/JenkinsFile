@@ -13,7 +13,6 @@ pipeline {
     TARGET_REPO = 'https://github.com/aks9890/manifest_file.git'
     DEPLOYMENT_FILE_PATH = 'Kubernetes/Deployment.yaml' // Adjust this path
     GITHUB_TOKEN = credentials('git-hub-access')
-    REPO_URL = 'https://github.com/aks9890/manifest_file.git'
   }
   stages {
     stage('Checkout') {
@@ -63,7 +62,7 @@ pipeline {
           sh "sed -i 's|replaceImageTag|${BUILD_NUMBER}|g' ${DEPLOYMENT_FILE_PATH}"
           sh "git add ${DEPLOYMENT_FILE_PATH}"
           sh 'git commit -m "Update deployment image to version ${BUILD_NUMBER}"'
-          sh "git push ${env.GITHUB_TOKEN}@${env.REPO_URL}"
+          sh "git push ${env.GITHUB_TOKEN}@github.com/aks9890/manifest_file.git"
         }
       }
     }
