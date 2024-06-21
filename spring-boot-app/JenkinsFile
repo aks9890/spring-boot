@@ -62,7 +62,7 @@ pipeline {
           sh "sed -i 's|replaceImageTag|${BUILD_NUMBER}|g' ${DEPLOYMENT_FILE_PATH}"
           sh "git add ${DEPLOYMENT_FILE_PATH}"
           sh 'git commit -m "Update deployment image to version ${BUILD_NUMBER}"'
-          sh "git push ${env.GITHUB_TOKEN}@github.com/aks9890/manifest_file.git"
+          sh "git push https://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@github.com/aks9890/manifest_file.git"
         }
       }
     }
