@@ -12,7 +12,6 @@ pipeline {
     REGISTRY_CREDENTIALS = credentials('docker-cred')
     TARGET_REPO = 'https://github.com/aks9890/manifest_file.git'
     DEPLOYMENT_FILE_PATH = 'Kubernetes/Deployment.yaml' // Adjust this path
-    GITHUB_TOKEN = credentials('git-hub-access')
   }
   stages {
     stage('Checkout') {
@@ -56,6 +55,7 @@ pipeline {
     }
     stage('Update Deployment File') {
       steps {
+        withCredentials([string(credentialsId: 'git-hub-access', variable: 'GITHUB_TOKEN')]) {
         dir('manifest_file') {
           sh "git config user.email 'akshaynagtilak123@gmail.com'"
           sh "git config user.name 'aks9890'"
