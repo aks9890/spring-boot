@@ -61,8 +61,8 @@ pipeline {
         steps {
             withCredentials([string(credentialsId: 'git-hub-access', variable: 'GITHUB_TOKEN')]) {
                 sh '''
-                    git config user.email "abhishek.xyz@gmail.com"
-                    git config user.name "Abhishek Veeramalla"
+                    git config user.email "akshaynagtilak123@gmail.com"
+                    git config user.name "aks9890"
                     BUILD_NUMBER=${BUILD_NUMBER}
                     sed -i "s/replaceImageTag/${BUILD_NUMBER}/g" Kubernetes/deployment.yaml
                     git add Kubernetes/deployment.yaml
